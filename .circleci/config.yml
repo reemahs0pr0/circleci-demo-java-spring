@@ -10,20 +10,20 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-gradle-wrapper-{{ checksum "app/gradle/wrapper/gradle-wrapper.properties" }}
+          key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - restore_cache:
-          key: v1-gradle-cache-{{ checksum "app/build.gradle" }}
+          key: v1-gradle-cache-{{ checksum "build.gradle" }}
       - run:
           name: Install dependencies
-          command: ./app/gradlew build -x test 
+          command: ./gradlew build -x test
       - save_cache:
           paths:
             - ~/.gradle/wrapper
-          key: v1-gradle-wrapper-{{ checksum "app/gradle/wrapper/gradle-wrapper.properties" }}
+          key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - save_cache:
           paths:
             - ~/.gradle/caches
-          key: v1-gradle-cache-{{ checksum "app/build.gradle" }}
+          key: v1-gradle-cache-{{ checksum "build.gradle" }}
       - persist_to_workspace:
           root: .
           paths:
@@ -59,29 +59,29 @@ jobs:
             # Format the arguments to "./gradlew test"
             GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
             echo "Prepared arguments for Gradle: $GRADLE_ARGS"
-            ./app/gradlew test $GRADLE_ARGS
+            ./gradlew test $GRADLE_ARGS
       - run:
           name: Generate code coverage report
           command:
-            ./app/gradlew jacocoTestReport
+            ./gradlew jacocoTestReport
       - store_test_results:
-          path: app/build/test-results/test
+          path: build/test-results/test
       - store_artifacts:
-          path: app/build/test-results/test
+          path: build/test-results/test
           when: always
       - store_artifacts:
-          path: app/build/reports/jacoco/test/html
+          path: build/reports/jacoco/test/html
           when: always
       - run:
           name: Assemble JAR
           command: |
             # Skip this for other nodes
             if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
-              ./app/gradlew assemble
+              ./gradlew assemble
             fi
       # This will be empty for all nodes except the first one
       - store_artifacts:
-          path: app/build/libs
+          path: build/libs
 
 workflows:
   version: 2
